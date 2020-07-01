@@ -1,8 +1,9 @@
 import React from 'react';
 import PersonIcon from '@material-ui/icons/Person';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import EditIcon from '@material-ui/icons/Edit';
-import { JoinRoom_joinRoom } from 'gqlTypes/JoinRoom';
+import { JoinRoom_joinRoom, JoinRoom_joinRoom_userMemberships_user } from 'gqlTypes/JoinRoom';
 
 import {
   Button,
@@ -19,11 +20,14 @@ interface IListPlayersProps {
   roomMetadata: JoinRoom_joinRoom;
   userId?: number;
   editNickname: () => void;
+  removeUser: (userId: number) => () => void;
 }
 
 export class ListPlayers extends React.Component<IListPlayersProps, {}> {
   render() {
     const metadata = this.props.roomMetadata;
+    const creator = metadata.userMemberships.find((membership) => membership.isCreator);
+    const isCreator = creator.user.id === this.props.userId;
     const playersList = metadata.userMemberships.map((membership, idx: number) => {
       let secondaryAction;
       if (membership.user.id == this.props.userId) {
@@ -31,6 +35,14 @@ export class ListPlayers extends React.Component<IListPlayersProps, {}> {
           <ListItemSecondaryAction>
             <Button data-testid="editNickname" onClick={this.props.editNickname}>
               <EditIcon />
+            </Button>
+          </ListItemSecondaryAction>
+        );
+      } else if (isCreator) {
+        secondaryAction = (
+          <ListItemSecondaryAction>
+            <Button data-testid="editNickname" onClick={this.props.removeUser(membership.user.id)}>
+              <RemoveCircleIcon />
             </Button>
           </ListItemSecondaryAction>
         );

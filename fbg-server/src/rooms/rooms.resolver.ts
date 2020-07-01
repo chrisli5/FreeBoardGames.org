@@ -39,6 +39,20 @@ export class RoomsResolver {
     return { ...room, userId };
   }
 
+  @UseGuards(GqlAuthGuard)
+  async removeFromRoom(
+    @CurrentUser() currentUser,
+    @Args({ name: 'roomId', type: () => String }) roomId: string,
+    @Args({ name: 'userIdToBeRemoved', type: () => Number })
+    userIdToBeRemoved: number,
+  ) {
+    const userId = currentUser.id;
+    await this.roomsService.leaveRoom(
+      userIdToBeRemoved,
+      roomId,
+    );
+  }
+
   @Subscription((returns) => Room)
   roomMutated(
     @Args({ name: 'roomId', type: () => String }) roomId: string,

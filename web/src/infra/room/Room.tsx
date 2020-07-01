@@ -15,7 +15,7 @@ import NicknameRequired from 'infra/common/components/auth/NicknameRequired';
 import { StartMatchButton } from './StartMatchButton';
 import { ReduxUserState } from 'infra/common/redux/definitions';
 import { connect } from 'react-redux';
-import { JoinRoom_joinRoom } from 'gqlTypes/JoinRoom';
+import { JoinRoom_joinRoom, JoinRoom_joinRoom_userMemberships_user } from 'gqlTypes/JoinRoom';
 import { Dispatch } from 'redux';
 import Router from 'next/router';
 import { Subscription } from '@apollo/react-components';
@@ -103,7 +103,12 @@ class Room extends React.Component<IRoomProps, IRoomState> {
             }
             return (
               <React.Fragment>
-                <ListPlayers roomMetadata={room} editNickname={this._toggleEditingName} userId={this.state.userId} />
+                <ListPlayers
+                  roomMetadata={room}
+                  editNickname={this._toggleEditingName}
+                  removeUser={this._removeUser}
+                  userId={this.state.userId}
+                />
                 <StartMatchButton roomMetadata={room} userId={this.state.userId} startMatch={this._startMatch} />
               </React.Fragment>
             );
@@ -150,6 +155,11 @@ class Room extends React.Component<IRoomProps, IRoomState> {
 
   _toggleEditingName = () => {
     this.setState({ editingName: !this.state.editingName });
+  };
+
+  _removeUser = (userIdToBeRemoved: number) => () => {
+    const dispatch = (this.props as any).dispatch;
+    LobbyService.removeUser(dispatch, userIdToBeRemoved, this._roomId());
   };
 
   _setNickname = (nickname: string) => {
